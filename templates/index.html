@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>TITAN AI | Resume Pro & ATS Scanner</title>
+    <style>
+        * { box-sizing: border-box; } 
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .container { background: white; width: 950px; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border-top: 10px solid #1a1a1a; }
+        .main-title { text-align: center; margin-bottom: 30px; }
+        .main-title h1 { margin: 0; color: #1a1a1a; font-size: 32px; letter-spacing: 2px; text-transform: uppercase; }
+        .main-title span { color: #007bff; }
+        .tab-nav { display: flex; gap: 10px; margin-bottom: 30px; background: #f8f9fa; padding: 8px; border-radius: 12px; }
+        .tab-btn { flex: 1; padding: 12px; border: none; background: none; font-weight: bold; cursor: pointer; color: #666; font-size: 15px; border-radius: 8px; transition: 0.3s; }
+        .tab-btn.active { background: #007bff; color: white; }
+        .input-group { margin-bottom: 20px; width: 100%; position: relative; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        label { display: block; font-size: 11px; font-weight: 800; color: #0056b3; margin-bottom: 8px; text-transform: uppercase; }
+        input, textarea, select { width: 100%; padding: 12px; border: 1px solid #d1e3ff; border-radius: 8px; font-size: 14px; background: #fcfdfe; }
+        .ai-gen-btn { font-size: 11px; background: #ffc107; color: #000; padding: 4px 12px; border-radius: 15px; cursor: pointer; float: right; font-weight: bold; border: none; }
+        .btn-row { display: flex; gap: 15px; margin-top: 30px; }
+        .btn { flex: 1; padding: 16px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; text-transform: uppercase; }
+        .btn-primary { background: #1a1a1a; color: white; }
+        .btn-secondary { background: #eef2f7; color: #007bff; border: 1px solid #007bff; }
+        .scanner-card { background: #f0f7ff; border: 2px dashed #007bff; padding: 40px; border-radius: 20px; text-align: center; }
+        .match-score { font-size: 56px; font-weight: bold; color: #28a745; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="main-title">
+            <h1>TITAN AI <span>RESUME PRO</span></h1>
+        </div>
+
+        <div class="tab-nav">
+            <button class="tab-btn active" id="b1" onclick="tab(1)">1. RESUME BUILDER</button>
+            <button class="tab-btn" id="b2" onclick="tab(2)">2. AI ATS SCANNER</button>
+        </div>
+
+        <div id="p1">
+            <form action="/generate" method="POST">
+                <div class="input-group">
+                    <label>Template Style</label>
+                    <select name="template_style">
+                        <option value="classic">Classic Professional Style</option>
+                        <option value="modern">Modern Professional Style</option>
+                    </select>
+                </div>
+
+                <div class="grid">
+                    <div class="input-group"><label>Full Name</label><input type="text" name="name"></div>
+                    <div class="input-group"><label>Email</label><input type="email" name="email"></div>
+                    <div class="input-group"><label>Phone</label><input type="text" name="phone"></div>
+                    <div class="input-group"><label>Address</label><input type="text" name="address"></div>
+                </div>
+                
+                <div class="input-group">
+                    <button type="button" class="ai-gen-btn" onclick="askAI()">⚡ MAGIC AI GENERATE</button>
+                    <label>Professional Objective</label>
+                    <textarea id="t_about" name="objective" rows="2"></textarea>
+                </div>
+
+                <div class="input-group" style="padding: 15px; border: 1px solid #d1e3ff; border-radius: 10px;">
+                    <label>Education</label>
+                    <div class="grid">
+                        <input type="text" name="college" placeholder="College Name">
+                        <input type="text" name="edu_date" placeholder="Timeline">
+                    </div>
+                    <input type="text" name="degree" placeholder="Degree Name" class="mt-2">
+                </div>
+
+                <div class="input-group" style="padding: 15px; border: 1px solid #d1e3ff; border-radius: 10px;">
+                    <label>Projects</label>
+                    <div class="grid">
+                        <input type="text" name="project_name" placeholder="Title">
+                        <input type="text" name="project_date" placeholder="Dates">
+                    </div>
+                    <textarea name="project_desc" rows="3" placeholder="Description" class="mt-2"></textarea>
+                </div>
+
+                <div class="input-group"><label>Skills</label><textarea id="t_skills" name="skills" rows="2"></textarea></div>
+                <div class="input-group"><label>Work Experience</label><textarea name="experience" rows="3"></textarea></div>
+                <div class="input-group"><label>Certifications</label><textarea name="certifications" rows="2"></textarea></div>
+
+                <div class="btn-row">
+                    <button type="submit" name="action" value="preview" class="btn btn-secondary">🔍 Live Preview</button>
+                    <button type="submit" name="action" value="download" class="btn btn-primary">📥 Download PDF</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="p2" style="display: none;">
+            <div class="scanner-card">
+                <h3>AI ATS Analysis</h3>
+                <p style="color: #666; font-size: 13px;">Our AI compares your resume to the job requirements to find missing keywords and calculate matching percentage.</p>
+                <div class="input-group" style="text-align: left;"><label>Upload PDF</label><input type="file" id="up_file" accept=".pdf"></div>
+                <div class="input-group" style="text-align: left;"><label>Job Description</label><textarea id="up_jd" rows="5"></textarea></div>
+                <button class="btn btn-primary" onclick="doScan()">📊 ANALYZE MATCH</button>
+            </div>
+            <div id="resultArea" style="text-align:center; display:none; margin-top: 20px;">
+                <div id="resScore" class="match-score">0%</div>
+                <div id="resMissing" style="color: red;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function tab(n) {
+            document.getElementById('p1').style.display = n === 1 ? 'block' : 'none';
+            document.getElementById('p2').style.display = n === 2 ? 'block' : 'none';
+            document.getElementById('b1').className = n === 1 ? 'tab-btn active' : 'tab-btn';
+            document.getElementById('b2').className = n === 2 ? 'tab-btn active' : 'tab-btn';
+        }
+        async function askAI() {
+            const s = document.getElementById('t_skills').value;
+            const res = await fetch('/get_ai_summary', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({skills: s})});
+            const d = await res.json();
+            document.getElementById('t_about').value = d.summary;
+        }
+        async function doScan() {
+            const file = document.getElementById('up_file').files[0];
+            const jd = document.getElementById('up_jd').value;
+            const fd = new FormData(); fd.append('resume_file', file); fd.append('jd', jd);
+            const res = await fetch('/scan_uploaded_pdf', {method: 'POST', body: fd});
+            const d = await res.json();
+            document.getElementById('resultArea').style.display = 'block';
+            document.getElementById('resScore').innerText = d.score + "%";
+            document.getElementById('resMissing').innerHTML = "Missing Keywords: " + d.missing.join(", ");
+        }
+    </script>
+</body>
+</html>
