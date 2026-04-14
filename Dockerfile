@@ -1,25 +1,24 @@
-# We are switching to 'bullseye' which is very stable for wkhtmltopdf
 FROM python:3.9-bullseye
 
-# Install wkhtmltopdf and its dependencies
+# Install wkhtmltopdf and system dependencies
 RUN apt-get update && apt-get install -y \
     wkhtmltopdf \
-    xvfb \
     libfontconfig1 \
     libxrender1 \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Install Python libraries
+# Install Python requirements
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy your code
+# Copy all project files
 COPY . .
 
-# Environment variable for the app to find the tool
+# Set environment variables for Render
 ENV WKHTMLTOPDF_PATH=/usr/bin/wkhtmltopdf
+ENV PORT=10000
 
-# Run with Gunicorn
-CMD ["xvfb-run", "gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+# Bind to port 10000 which Render expects
+CMD ["gunicorn", "--bind", "0.0.0.0:10000", "app:app"]
