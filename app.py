@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, make_response, jsonify
 import pdfkit
 import io
+import os
 from pdfminer.high_level import extract_text
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
@@ -19,7 +20,7 @@ def scan_uploaded_pdf():
     if 'resume_file' not in request.files:
         return jsonify({'error': 'No file uploaded'})
     file = request.files['resume_file']
-    jd_text = request.form.get('jd')
+    jd_text = request.form.get('jd', '')
     try:
         pdf_content = file.read()
         resume_text = extract_text(io.BytesIO(pdf_content))
@@ -58,7 +59,6 @@ def generate():
     template_style = request.form.get('template_style', 'classic')
     action = request.form.get('action')
 
-    # CSS with ONLY Top Header Line
     if template_style == "classic":
         style_css = """
             @page { margin: 35px; size: A4; }
@@ -66,7 +66,7 @@ def generate():
             .header { text-align: center; border-bottom: 1.5px solid #000; padding-bottom: 10px; margin-bottom: 15px; }
             .header h1 { margin: 0; font-size: 18px; text-transform: uppercase; letter-spacing: 1px; }
             .contact { font-size: 10.5px; margin-top: 5px; }
-            .section-title { font-size: 13px; font-weight: bold; text-transform: uppercase; margin-top: 20px; margin-bottom: 5px; } /* No underline */
+            .section-title { font-size: 13px; font-weight: bold; text-transform: uppercase; margin-top: 20px; margin-bottom: 5px; }
             .text { font-size: 11.5px; white-space: pre-line; margin-bottom: 10px; }
             .flex-row { display: flex; justify-content: space-between; font-weight: bold; font-size: 12px; }
         """
@@ -100,8 +100,23 @@ def generate():
     </html>
     """
     
-    config = pdfkit.configuration(wkhtmltopdf=r'D:\wkhtmltopdf\bin\wkhtmltopdf.exe')
-    pdf = pdfkit.from_string(html_content, False, configuration=config)
+    # DYNAMIC PATH: Switches between your PC and Render Server
+    if os.environ.get('WKHTMLTOPDF_PATH'):
+        path_wkhtmltopdf = os.environ.get('WKHTMLTOPDF_PATH')
+    else:
+        path_wkhtmltopdf = r'D:\wkhtmltopdf\bin\wkhtmltopdf.exe'
+
+    # SERVER OPTIONS: Essential for running on Render
+    options = {
+        'quiet': '',
+        'no-outline': None,
+        'enable-local-file-access': None,
+        'disable-smart-shrinking': None
+    }
+
+    config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
+    pdf = pdfkit.from_string(html_content, False, configuration=config, options=options)
+    
     res = make_response(pdf)
     res.headers['Content-Type'] = 'application/pdf'
     safe_name = name.replace(" ", "_") if name else "Titan"
@@ -109,4 +124,6 @@ def generate():
     return res
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Binds to Port 10000 for Render deployment
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port)
