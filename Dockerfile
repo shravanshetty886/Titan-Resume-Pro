@@ -1,19 +1,25 @@
-FROM python:3.9-slim
+# We are switching to 'bullseye' which is very stable for wkhtmltopdf
+FROM python:3.9-bullseye
 
-# Install the PDF tool into the server's OS
-RUN apt-get update && apt-get install -y wkhtmltopdf && rm -rf /var/lib/apt/lists/*
+# Install wkhtmltopdf and its dependencies
+RUN apt-get update && apt-get install -y \
+    wkhtmltopdf \
+    xvfb \
+    libfontconfig1 \
+    libxrender1 \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Install your Python libraries
+# Install Python libraries
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy your code into the server
+# Copy your code
 COPY . .
 
-# Set the path variable so app.py knows where to look
+# Environment variable for the app to find the tool
 ENV WKHTMLTOPDF_PATH=/usr/bin/wkhtmltopdf
 
-# Start the app
+# Run with Gunicorn
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
