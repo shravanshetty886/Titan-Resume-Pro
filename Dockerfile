@@ -22,4 +22,4 @@ COPY . .
 ENV WKHTMLTOPDF_PATH=/usr/bin/wkhtmltopdf
 
 # Run with Gunicorn
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+CMD ["xvfb-run", "gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
