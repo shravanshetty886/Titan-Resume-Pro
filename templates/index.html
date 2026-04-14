@@ -1,68 +1,41 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>TITAN AI | Resume Pro & ATS Scanner</title>
+    <title>TITAN | Resume Pro & ATS Scanner</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; } 
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f9; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        
+        body { font-family: 'Roboto', sans-serif; background: #f4f7f9; margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; }
         .container { background: white; width: 100%; max-width: 950px; padding: 40px; border-radius: 24px; box-shadow: 0 15px 35px rgba(0,0,0,0.05); border-top: 10px solid #1a1a1a; }
-        
         .main-title { text-align: center; margin-bottom: 30px; }
-        .main-title h1 { margin: 0; color: #1a1a1a; font-size: 34px; letter-spacing: 1px; font-weight: 800; }
+        .main-title h1 { margin: 0; color: #1a1a1a; font-size: 28px; letter-spacing: 1px; font-weight: 800; }
         .main-title span { color: #007bff; }
-        
         .tab-nav { display: flex; gap: 10px; margin-bottom: 30px; background: #f1f3f5; padding: 6px; border-radius: 14px; }
         .tab-btn { flex: 1; padding: 14px; border: none; background: none; font-weight: 700; cursor: pointer; color: #555; font-size: 14px; border-radius: 10px; transition: all 0.3s ease; }
         .tab-btn.active { background: #007bff; color: white; box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2); }
-        
         .input-group { margin-bottom: 22px; width: 100%; position: relative; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
-        
         label { display: block; font-size: 11px; font-weight: 800; color: #4b6584; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-        
         input, textarea, select { width: 100%; padding: 12px 16px; border: 1px solid #e1e8ef; border-radius: 10px; font-size: 14px; background: #fff; transition: border 0.3s ease; }
         input:focus, textarea:focus { outline: none; border-color: #007bff; box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1); }
-        
-        .ai-gen-btn { font-size: 10px; background: #ffd32a; color: #000; padding: 5px 14px; border-radius: 20px; cursor: pointer; float: right; font-weight: 800; border: none; transition: transform 0.2s; }
-        .ai-gen-btn:hover { transform: translateY(-1px); background: #ffc107; }
-        
+        .add-btn { font-size: 10px; background: #ffd32a; color: #000; padding: 5px 14px; border-radius: 20px; cursor: pointer; float: right; font-weight: 800; border: none; }
         .btn-row { display: flex; gap: 15px; margin-top: 30px; }
-        .btn { flex: 1; padding: 16px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; text-transform: uppercase; font-size: 13px; transition: all 0.2s; }
+        .btn { flex: 1; padding: 16px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; text-transform: uppercase; font-size: 13px; }
         .btn-primary { background: #1a1a1a; color: white; }
-        .btn-primary:hover { background: #333; transform: translateY(-1px); }
         .btn-secondary { background: #fff; color: #007bff; border: 2px solid #007bff; }
-        .btn-secondary:hover { background: #f0f7ff; }
-        
         .scanner-card { background: #ffffff; border: 2px dashed #cbd5e0; padding: 40px; border-radius: 20px; text-align: center; }
         .match-score { font-size: 64px; font-weight: 800; color: #20bf6b; margin: 10px 0; }
-        
-        /* New Style for Missing Keyword Badges */
         .keyword-badge { display: inline-block; background: #fed7d7; color: #c53030; padding: 5px 12px; border-radius: 20px; margin: 4px; font-size: 12px; font-weight: 700; border: 1px solid #feb2b2; }
-
-        .pulse-icon { animation: pulse 1.5s infinite; }
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.15); opacity: 0.8; }
-            100% { transform: scale(1); opacity: 1; }
-        }
+        .dynamic-block { border-bottom: 1px solid #eee; padding-bottom: 15px; margin-bottom: 15px; }
+        .dynamic-block:last-child { border-bottom: none; margin-bottom: 0; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="main-title">
-            <h1>TITAN AI <span>PRO</span></h1>
-        </div>
-
+        <div class="main-title"><h1>TITAN <span>PRO</span></h1></div>
         <div class="tab-nav">
             <button class="tab-btn active" id="b1" onclick="tab(1)">RESUME BUILDER</button>
             <button class="tab-btn" id="b2" onclick="tab(2)">ATS SCANNER</button>
-        </div>
-
-        <div id="loading-spinner" style="display:none; text-align: center; margin: 0 auto 25px; padding: 20px; border-radius: 12px; background: #ebf8ff; border: 1px solid #bee3f8; max-width: 500px;">
-            <div class="pulse-icon" style="font-size: 28px; margin-bottom: 10px;">⚡</div>
-            <p style="color: #2b6cb0; font-weight: 800; font-size: 15px; margin: 0;">Titan AI is processing...</p>
-            <p style="color: #4a5568; font-size: 12px; margin-top: 5px;">Server waking up (takes ~60s on first load). Please wait.</p>
         </div>
 
         <div id="p1">
@@ -74,41 +47,56 @@
                         <option value="modern">Modern Sidebar (Premium)</option>
                     </select>
                 </div>
-
                 <div class="grid">
                     <div class="input-group"><label>Name</label><input type="text" name="name" required placeholder="John Doe"></div>
                     <div class="input-group"><label>Email</label><input type="email" name="email" required placeholder="john@example.com"></div>
                     <div class="input-group"><label>Phone</label><input type="text" name="phone" placeholder="+91 0000000000"></div>
-                    <div class="input-group"><label>Address</label><input type="text" name="address" placeholder="City, Country"></div>
+                    <div class="input-group"><label>Address</label><input type="text" name="address" placeholder="City, State, Country"></div>
+                    <div class="input-group"><label>Links</label><input type="text" name="links" placeholder="LinkedIn / Portfolio URL"></div>
                 </div>
+                <div class="input-group"><label>Professional Summary</label><textarea name="objective" rows="3"></textarea></div>
                 
-                <div class="input-group">
-                    <button type="button" id="ai-btn" class="ai-gen-btn" onclick="askAI()">⚡ MAGIC AI SUMMARY</button>
-                    <label>Professional Summary</label>
-                    <textarea id="t_about" name="objective" rows="3" placeholder="Click 'Magic AI' to generate..."></textarea>
-                </div>
-
                 <div class="input-group" style="padding: 20px; background: #f8fafc; border-radius: 12px; border: 1px solid #edf2f7;">
+                    <button type="button" class="add-btn" onclick="addBlock('edu-container')">+ Add Education</button>
                     <label>Education</label>
-                    <div class="grid">
-                        <input type="text" name="college" placeholder="Institution Name">
-                        <input type="text" name="edu_date" placeholder="2022 - 2026">
+                    <div id="edu-container">
+                        <div class="dynamic-block">
+                            <div class="grid">
+                                <input type="text" name="college" placeholder="Institution Name">
+                                <input type="text" name="edu_date" placeholder="2022 - 2026">
+                            </div>
+                            <input type="text" name="degree" placeholder="Degree Name" style="margin-top: 12px;">
+                        </div>
                     </div>
-                    <input type="text" name="degree" placeholder="Degree / Course Name" style="margin-top: 12px;">
                 </div>
 
                 <div class="input-group" style="padding: 20px; background: #f8fafc; border-radius: 12px; border: 1px solid #edf2f7;">
+                    <button type="button" class="add-btn" onclick="addBlock('proj-container')">+ Add Project</button>
                     <label>Project Highlight</label>
-                    <div class="grid">
-                        <input type="text" name="project_name" placeholder="Project Title">
-                        <input type="text" name="project_date" placeholder="Timeline">
+                    <div id="proj-container">
+                        <div class="dynamic-block">
+                            <div class="grid">
+                                <input type="text" name="project_name" placeholder="Project Title">
+                                <input type="text" name="project_date" placeholder="Timeline">
+                            </div>
+                            <textarea name="project_desc" rows="3" placeholder="Key achievements..."></textarea>
+                        </div>
                     </div>
-                    <textarea name="project_desc" rows="3" placeholder="Key achievements and technologies used..." style="margin-top: 12px;"></textarea>
                 </div>
 
-                <div class="input-group"><label>Skills</label><textarea id="t_skills" name="skills" rows="2" placeholder="Java, Python, SQL..."></textarea></div>
+                <div class="input-group"><label>Skills</label><textarea name="skills" rows="2" placeholder="Java, Python, SQL..."></textarea></div>
                 <div class="input-group"><label>Experience</label><textarea name="experience" rows="3"></textarea></div>
-                <div class="input-group"><label>Certifications</label><textarea name="certifications" rows="2"></textarea></div>
+
+                <div class="input-group" style="padding: 20px; background: #f8fafc; border-radius: 12px; border: 1px solid #edf2f7;">
+                    <button type="button" class="add-btn" onclick="addBlock('cert-container')">+ Add Certificate</button>
+                    <label>Certifications</label>
+                    <div id="cert-container">
+                        <div class="dynamic-block">
+                            <input type="text" name="cert_title" placeholder="Certificate Title">
+                            <textarea name="cert_desc" rows="2" placeholder="Details..."></textarea>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="btn-row">
                     <button type="submit" name="action" value="preview" class="btn btn-secondary">Preview</button>
@@ -120,78 +108,47 @@
         <div id="p2" style="display: none;">
             <div class="scanner-card">
                 <h3 style="margin-top:0;">ATS Optimization Scanner</h3>
-                <p style="color: #718096; font-size: 13px; margin-bottom: 25px;">Upload your resume and paste the job description to calculate your match score.</p>
+                <p style="color: #718096; font-size: 13px; margin-bottom: 15px;">Analyze your resume match score against specific job requirements.</p>
                 <div class="input-group" style="text-align: left;"><label>Upload Resume (PDF)</label><input type="file" id="up_file" accept=".pdf"></div>
-                <div class="input-group" style="text-align: left;"><label>Job Description</label><textarea id="up_jd" rows="6" placeholder="Paste the job requirements here..."></textarea></div>
+                <div class="input-group" style="text-align: left;"><label>Job Description</label><textarea id="up_jd" rows="6"></textarea></div>
                 <button class="btn btn-primary" style="width:100%;" onclick="doScan()">Start Analysis</button>
             </div>
             <div id="resultArea" style="text-align:center; display:none; margin-top: 30px; padding: 20px; background: #fff; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
                 <div style="font-size: 14px; font-weight: 700; color: #4a5568;">Your Match Score</div>
                 <div id="resScore" class="match-score">0%</div>
                 <div style="margin-top: 15px;">
-                    <label style="color: #c53030;">Missing Keywords Found:</label>
+                    <label style="color: #c53030; font-weight: 800;">Missing Key Words :</label>
                     <div id="resMissing" style="margin-top: 10px;"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <footer style="text-align: center; padding: 30px; margin-top: 40px; width: 100%; border-top: 1px solid #e2e8f0; color: #718096; font-size: 13px;">
-        <p>Built with <strong>Python, Flask & Docker</strong></p>
-        <p>
-            <a href="https://github.com/shravanshetty886/Titan-Resume-Pro" target="_blank" style="color: #007bff; text-decoration: none; font-weight: 700;">GitHub Repository</a> | 
-            <a href="mailto:shravanshatty@gmail.com" style="color: #007bff; text-decoration: none; font-weight: 700;">Support</a>
-        </p>
-    </footer>
-
     <script>
-        const loader = document.getElementById('loading-spinner');
-
         function tab(n) {
             document.getElementById('p1').style.display = n === 1 ? 'block' : 'none';
             document.getElementById('p2').style.display = n === 2 ? 'block' : 'none';
             document.getElementById('b1').className = n === 1 ? 'tab-btn active' : 'tab-btn';
             document.getElementById('b2').className = n === 2 ? 'tab-btn active' : 'tab-btn';
         }
-
-        async function askAI() {
-            loader.style.display = 'block';
-            const s = document.getElementById('t_skills').value;
-            try {
-                const res = await fetch('/get_ai_summary', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({skills: s})});
-                const d = await res.json();
-                document.getElementById('t_about').value = d.summary;
-            } finally {
-                loader.style.display = 'none';
-            }
+        function addBlock(containerId) {
+            const container = document.getElementById(containerId);
+            const firstBlock = container.querySelector('.dynamic-block');
+            const newBlock = firstBlock.cloneNode(true);
+            newBlock.querySelectorAll('input, textarea').forEach(input => input.value = '');
+            container.appendChild(newBlock);
         }
-
         async function doScan() {
-            loader.style.display = 'block';
-            const file = document.getElementById('up_file').files[0];
-            const jd = document.getElementById('up_jd').value;
-            if(!file || !jd) { alert("Please upload a file and paste the JD"); loader.style.display='none'; return; }
-            const fd = new FormData(); fd.append('resume_file', file); fd.append('jd', jd);
-            try {
-                const res = await fetch('/scan_uploaded_pdf', {method: 'POST', body: fd});
-                const d = await res.json();
-                document.getElementById('resultArea').style.display = 'block';
-                document.getElementById('resScore').innerText = d.score + "%";
-                
-                // Convert missing keywords to badges
-                const badges = d.missing.map(word => `<span class="keyword-badge">${word}</span>`).join('');
-                document.getElementById('resMissing').innerHTML = badges;
-                
-                document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' });
-            } finally {
-                loader.style.display = 'none';
-            }
+            const fd = new FormData();
+            fd.append('resume_file', document.getElementById('up_file').files[0]);
+            fd.append('jd', document.getElementById('up_jd').value);
+            const res = await fetch('/scan_uploaded_pdf', {method: 'POST', body: fd});
+            const d = await res.json();
+            document.getElementById('resultArea').style.display = 'block';
+            document.getElementById('resScore').innerText = d.score + "%";
+            document.getElementById('resMissing').innerHTML = d.missing.map(word => `<span class="keyword-badge">${word}</span>`).join('');
+            document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' });
         }
-
-        document.getElementById('resumeForm').addEventListener('submit', function() {
-            loader.style.display = 'block';
-            loader.scrollIntoView({ behavior: 'smooth' });
-        });
     </script>
 </body>
 </html>
