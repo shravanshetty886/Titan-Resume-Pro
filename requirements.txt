@@ -2,3 +2,4 @@ flask
 pdfkit
 pypdf
 scikit-learn
+gunicorn
