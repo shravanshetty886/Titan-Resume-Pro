@@ -2,9 +2,10 @@ from flask import Flask, render_template, request, make_response, jsonify
 import pdfkit
 import io
 import os
-from pdfminer.high_level import extract_text
+from pypdf import PdfReader 
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+import re
 
 app = Flask(__name__)
 
@@ -12,21 +13,40 @@ app = Flask(__name__)
 def scan_uploaded_pdf():
     if 'resume_file' not in request.files:
         return jsonify({'error': 'No file uploaded'})
+    
     file = request.files['resume_file']
-    jd_text = request.form.get('jd', '')
+    jd_text = request.form.get('jd', '').strip()
+    
+    if not jd_text:
+        return jsonify({'error': 'Job description is empty'})
+
     try:
-        pdf_content = file.read()
-        resume_text = extract_text(io.BytesIO(pdf_content))
-        text_list = [resume_text, jd_text]
+        reader = PdfReader(io.BytesIO(file.read()))
+        resume_text = ""
+        for page in reader.pages:
+            content = page.extract_text()
+            if content:
+                resume_text += content + " "
+
+        if not resume_text.strip():
+            return jsonify({'error': 'Could not extract text from PDF'})
+
+        clean_resume = resume_text.lower()
+        clean_jd = jd_text.lower()
+
+        text_list = [clean_resume, clean_jd]
         cv = CountVectorizer()
         count_matrix = cv.fit_transform(text_list)
         match_percentage = round(cosine_similarity(count_matrix)[0][1] * 100, 2)
         
-        jd_words = set(jd_text.lower().replace(',', '').replace('.', '').split())
-        resume_words = set(resume_text.lower().replace(',', '').replace('.', '').split())
-        missing = [word for word in jd_words if word not in resume_words and len(word) > 3]
+        jd_words = set(re.findall(r'\b\w{3,}\b', clean_jd)) 
+        resume_words = set(re.findall(r'\b\w{3,}\b', clean_resume))
+        missing = [word for word in jd_words if word not in resume_words]
         
-        return jsonify({'score': match_percentage, 'missing': missing[:10]})
+        return jsonify({
+            'score': match_percentage, 
+            'missing': missing[:15]
+        })
     except Exception as e:
         return jsonify({'error': str(e)})
 
@@ -47,23 +67,30 @@ def generate():
     template_style = request.form.get('template_style', 'classic')
     action = request.form.get('action')
 
-    # Multi-Entry Processing
+    # Multi-Entry Processing with "Omit if Empty" logic
     colleges = request.form.getlist('college')
     edu_dates = request.form.getlist('edu_date')
     degrees = request.form.getlist('degree')
-    edu_html = "".join([f'<div class="flex-row"><span>{c}</span><span>{t}</span></div><div class="text"><i>{d}</i></div>' for c, t, d in zip(colleges, edu_dates, degrees) if c.strip()])
+    edu_entries = [f'<div class="flex-row"><span>{c}</span><span>{t}</span></div><div class="text"><i>{d}</i></div>' 
+                   for c, t, d in zip(colleges, edu_dates, degrees) if c.strip()]
+    edu_html = f'<div class="section-title">Education</div>{" ".join(edu_entries)}' if edu_entries else ''
 
     p_names = request.form.getlist('project_name')
     p_dates = request.form.getlist('project_date')
     p_descs = request.form.getlist('project_desc')
-    proj_html = "".join([f'<div class="flex-row"><span>{n}</span><span>{t}</span></div><div class="text">{d}</div>' for n, t, d in zip(p_names, p_dates, p_descs) if n.strip()])
+    proj_entries = [f'<div class="flex-row"><span>{n}</span><span>{t}</span></div><div class="text">{d}</div>' 
+                    for n, t, d in zip(p_names, p_dates, p_descs) if n.strip()]
+    proj_html = f'<div class="section-title">Projects</div>{" ".join(proj_entries)}' if proj_entries else ''
 
     c_titles = request.form.getlist('cert_title')
     c_descs = request.form.getlist('cert_desc')
-    cert_html = "".join([f'<div class="flex-row"><span>{title}</span></div><div class="text">{desc}</div>' for title, desc in zip(c_titles, c_descs) if title.strip()])
+    cert_entries = [f'<div class="flex-row"><span>{title}</span></div><div class="text">{desc}</div>' 
+                    for title, desc in zip(c_titles, c_descs) if title.strip()]
+    cert_html = f'<div class="section-title">Certifications</div>{" ".join(cert_entries)}' if cert_entries else ''
 
-    contact_line = f"{phone} | {email}"
-    if links: contact_line += f" | {links}"
+    # Header Contact Info logic
+    contact_parts = [p for p in [phone, email, links] if p.strip()]
+    contact_line = " | ".join(contact_parts)
 
     if template_style == "classic":
         style_css = """
@@ -95,17 +122,17 @@ def generate():
     <head><style>{style_css}</style></head>
     <body>
         <div class="header">
-            <h1>{name}</h1>
-            <div class="contact">{contact_line}</div>
-            <div class="contact">{address}</div>
+            {f'<h1>{name}</h1>' if name else ''}
+            {f'<div class="contact">{contact_line}</div>' if contact_line else ''}
+            {f'<div class="contact">{address}</div>' if address.strip() else ''}
         </div>
         <div style="padding: 0 30px;">
-            {f'<div class="section-title">Professional Objective</div><div class="text">{objective}</div>' if objective else ''}
-            <div class="section-title">Education</div>{edu_html}
-            {f'<div class="section-title">Skills</div><div class="text">{skills}</div>' if skills else ''}
-            {f'<div class="section-title">Experience</div><div class="text">{experience}</div>' if experience else ''}
-            <div class="section-title">Projects</div>{proj_html}
-            <div class="section-title">Certifications</div>{cert_html}
+            {f'<div class="section-title">Professional Objective</div><div class="text">{objective}</div>' if objective.strip() else ''}
+            {edu_html}
+            {f'<div class="section-title">Skills</div><div class="text">{skills}</div>' if skills.strip() else ''}
+            {f'<div class="section-title">Experience</div><div class="text">{experience}</div>' if experience.strip() else ''}
+            {proj_html}
+            {cert_html}
         </div>
     </body>
     </html>
@@ -118,7 +145,6 @@ def generate():
     
     res = make_response(pdf)
     res.headers['Content-Type'] = 'application/pdf'
-    # Format filename as Name_Resume.pdf
     safe_filename = f"{name.replace(' ', '_')}_Resume.pdf" if name else "Resume.pdf"
     res.headers['Content-Disposition'] = f"{'inline' if action=='preview' else 'attachment'}; filename={safe_filename}"
     return res
