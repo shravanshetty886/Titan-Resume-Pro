@@ -18,7 +18,7 @@
         label { display: block; font-size: 11px; font-weight: 800; color: #4b6584; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
         input, textarea, select { width: 100%; padding: 12px 16px; border: 1px solid #e1e8ef; border-radius: 10px; font-size: 14px; background: #fff; transition: border 0.3s ease; }
         input:focus, textarea:focus { outline: none; border-color: #007bff; box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1); }
-        .add-btn { font-size: 10px; background: #ffd32a; color: #000; padding: 5px 14px; border-radius: 20px; cursor: pointer; float: right; font-weight: 800; border: none; }
+        .add-btn { font-size: 10px; background: #ffd32a; color: #000; padding: 4px 12px; border-radius: 20px; cursor: pointer; float: right; font-weight: 800; border: none; }
         .btn-row { display: flex; gap: 15px; margin-top: 30px; }
         .btn { flex: 1; padding: 16px; border-radius: 12px; border: none; font-weight: 700; cursor: pointer; text-transform: uppercase; font-size: 13px; }
         .btn-primary { background: #1a1a1a; color: white; }
@@ -111,7 +111,7 @@
                 <p style="color: #718096; font-size: 13px; margin-bottom: 15px;">Analyze your resume match score against specific job requirements.</p>
                 <div class="input-group" style="text-align: left;"><label>Upload Resume (PDF)</label><input type="file" id="up_file" accept=".pdf"></div>
                 <div class="input-group" style="text-align: left;"><label>Job Description</label><textarea id="up_jd" rows="6"></textarea></div>
-                <button class="btn btn-primary" style="width:100%;" onclick="doScan()">Start Analysis</button>
+                <button id="scanBtn" class="btn btn-primary" style="width:100%;" onclick="doScan()">Start Analysis</button>
             </div>
             <div id="resultArea" style="text-align:center; display:none; margin-top: 30px; padding: 20px; background: #fff; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);">
                 <div style="font-size: 14px; font-weight: 700; color: #4a5568;">Your Match Score</div>
@@ -139,24 +139,48 @@
             container.appendChild(newBlock);
         }
         async function doScan() {
+            const btn = document.getElementById('scanBtn');
+            const fileInput = document.getElementById('up_file');
+            const jdInput = document.getElementById('up_jd');
+
+            if (!fileInput.files[0] || !jdInput.value) {
+                alert("Please upload a PDF and provide a job description.");
+                return;
+            }
+
+            btn.innerText = "Analyzing...";
+            btn.disabled = true;
+
             const fd = new FormData();
-            fd.append('resume_file', document.getElementById('up_file').files[0]);
-            fd.append('jd', document.getElementById('up_jd').value);
-            const res = await fetch('/scan_uploaded_pdf', {method: 'POST', body: fd});
-            const d = await res.json();
-            document.getElementById('resultArea').style.display = 'block';
-            document.getElementById('resScore').innerText = d.score + "%";
-            document.getElementById('resMissing').innerHTML = d.missing.map(word => `<span class="keyword-badge">${word}</span>`).join('');
-            document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' });
+            fd.append('resume_file', fileInput.files[0]);
+            fd.append('jd', jdInput.value);
+
+            try {
+                const res = await fetch('/scan_uploaded_pdf', {method: 'POST', body: fd});
+                const d = await res.json();
+
+                if (d.error) {
+                    alert("Error: " + d.error);
+                } else {
+                    document.getElementById('resultArea').style.display = 'block';
+                    document.getElementById('resScore').innerText = d.score + "%";
+                    document.getElementById('resMissing').innerHTML = d.missing.map(word => `<span class="keyword-badge">${word}</span>`).join('');
+                    document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' });
+                }
+            } catch (e) {
+                alert("Failed to connect to server.");
+            } finally {
+                btn.innerText = "Start Analysis";
+                btn.disabled = false;
+            }
         }
     </script>
-<footer style="text-align: center; padding: 20px; margin-top: 50px; border-top: 1px solid #ddd; font-family: Arial, sans-serif;">
-    <p>Built with Python, Flask, and Docker</p>
-    <p>
-        <a href="https://github.com/shravanshetty886/Titan-Resume-Pro" target="_blank" style="color: #007bff; text-decoration: none;">GitHub Repository </a> | 
-        <a href="mailto:shravanshatty@gmail.com" target="_blank" style="color: #007bff; text-decoration: none;">Support</a>
-    </p>
-</footer>
-    
+    <footer style="text-align: center; padding: 20px; margin-top: 50px; border-top: 1px solid #ddd; font-family: Arial, sans-serif;">
+        <p>Built with Python, Flask, and Docker</p>
+        <p>
+            <a href="https://github.com/shravanshetty886/Titan-Resume-Pro" target="_blank" style="color: #007bff; text-decoration: none;">GitHub Repository </a> | 
+            <a href="mailto:shravanshatty@gmail.com" target="_blank" style="color: #007bff; text-decoration: none;">Support</a>
+        </p>
+    </footer>
 </body>
 </html>
