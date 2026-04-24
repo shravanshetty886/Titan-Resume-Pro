@@ -21,15 +21,22 @@ def scan_uploaded_pdf():
         return jsonify({'error': 'Job description is empty'})
 
     try:
-        reader = PdfReader(io.BytesIO(file.read()))
+        # Read the file into memory
+        pdf_stream = io.BytesIO(file.read())
+        reader = PdfReader(pdf_stream)
         resume_text = ""
+        
         for page in reader.pages:
-            content = page.extract_text()
+            # Attempt plain text extraction which is better for wkhtmltopdf outputs
+            content = page.extract_text(extraction_mode="plain")
+            if not content:
+                content = page.extract_text()
             if content:
                 resume_text += content + " "
 
+        # Secondary check: If pypdf fails to find text, the PDF might be unsearchable
         if not resume_text.strip():
-            return jsonify({'error': 'Could not extract text from PDF'})
+            return jsonify({'error': 'Could not extract text from PDF. Ensure the PDF is not a scanned image.'})
 
         clean_resume = resume_text.lower()
         clean_jd = jd_text.lower()
@@ -67,7 +74,7 @@ def generate():
     template_style = request.form.get('template_style', 'classic')
     action = request.form.get('action')
 
-    # Multi-Entry Processing with "Omit if Empty" logic
+    # Multi-Entry Processing
     colleges = request.form.getlist('college')
     edu_dates = request.form.getlist('edu_date')
     degrees = request.form.getlist('degree')
@@ -88,7 +95,6 @@ def generate():
                     for title, desc in zip(c_titles, c_descs) if title.strip()]
     cert_html = f'<div class="section-title">Certifications</div>{" ".join(cert_entries)}' if cert_entries else ''
 
-    # Header Contact Info logic
     contact_parts = [p for p in [phone, email, links] if p.strip()]
     contact_line = " | ".join(contact_parts)
 
@@ -139,7 +145,17 @@ def generate():
     """
     
     path_wkhtmltopdf = os.environ.get('WKHTMLTOPDF_PATH', r'D:\wkhtmltopdf\bin\wkhtmltopdf.exe')
-    options = {'quiet': '', 'no-outline': None, 'enable-local-file-access': None, 'disable-smart-shrinking': None}
+    
+    # IMPROVED OPTIONS for better text extraction
+    options = {
+        'quiet': '',
+        'encoding': "UTF-8",
+        'no-outline': None,
+        'enable-local-file-access': None,
+        'disable-smart-shrinking': None,
+        'pdf-title': f"{name} Resume"
+    }
+    
     config = pdfkit.configuration(wkhtmltopdf=path_wkhtmltopdf)
     pdf = pdfkit.from_string(html_content, False, configuration=config, options=options)
     
